@@ -180,10 +180,20 @@ export class AppComponent {
 		// 	doc.close();
 
 		window.addEventListener('message', event => {
-			console.log(`Parent Received message: `);
-			console.log(event);
-			if (!(String(event.data)).includes("player")) {
-		//		window.postMessage("player 1");
+			if (!event.data.hasOwnProperty("to_player")) {
+				console.log(`Parent Received message: `);
+				console.log(event);
+
+				// pass move command from one iframe to the other
+				let otherPlayerID: number = 1;
+
+				if (event.data[0].playerID == 1) {
+					otherPlayerID = 2;
+				}
+				console.log("playerID: " + event.data[0].playerID);
+				console.log("otherPlayerID: " + otherPlayerID);
+				
+				window.postMessage({ "to_player": otherPlayerID, "move": event.data[0].data.move });
 			}
 		});
 	}

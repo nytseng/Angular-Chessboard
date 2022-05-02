@@ -20,7 +20,7 @@ import { Observable, Subscription } from 'rxjs';
 })
 
 export class DynamicComponent implements OnInit {
-	@Input() playerID: any;
+	@Input() playerID: number;
 	@Output() firstOutput: any;
 
 	title = 'DynamicComponent';
@@ -121,7 +121,7 @@ export class DynamicComponent implements OnInit {
 				data: move
 			}]
 
-	//	window.parent.postMessage(move, '*');
+		//	window.parent.postMessage(move, '*');
 		window.parent.postMessage(jsonData, '*');
 
 	}
@@ -176,8 +176,13 @@ export class DynamicComponent implements OnInit {
 	}
 	ngAfterViewInit() {
 		addEventListener('message', event => {
-			console.log("Chessboard " + this.playerID + " received message:");
-			console.table(event.data);
+			if (event.data.hasOwnProperty("to_player") && event.data.to_player == this.playerID) {
+
+				console.log("Chessboard " + this.playerID + " received message:");
+				console.table(event.data)
+				this.manualMove = event.data.move;
+				this.moveManual();
+			};
 		});
 
 		// 	let content = '<button id="button" class="button" >My button </button>';
