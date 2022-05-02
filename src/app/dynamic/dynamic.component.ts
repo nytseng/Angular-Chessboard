@@ -1,9 +1,15 @@
-import { Component, ElementRef, ViewChild, ComponentRef, ViewContainerRef, ComponentFactoryResolver, EventEmitter, OnInit, Input, Output, ViewEncapsulation } from '@angular/core';
+import {
+	Component, ElementRef, ViewChild, ComponentRef, ViewContainerRef,
+	ComponentFactoryResolver, EventEmitter, OnInit, Input, Output,
+	ViewEncapsulation, Host
+
+} from '@angular/core';
 import {
 	MoveChange,
 	NgxChessBoardComponent,
 	PieceIconInput
 } from 'ngx-chess-board';
+import { Observable, Subscription } from 'rxjs';
 
 @Component({
 	selector: 'app-dynamic',
@@ -14,9 +20,7 @@ import {
 })
 
 export class DynamicComponent implements OnInit {
-	@Input() firstInput: any;
-	@Input() playerID: number;
-
+	@Input() playerID: any;
 	@Output() firstOutput: any;
 
 	title = 'DynamicComponent';
@@ -43,6 +47,7 @@ export class DynamicComponent implements OnInit {
 		console.log("constructor");
 		//this.onLoad();
 	}
+
 
 	// constructor() {
 	/** Trigger on data load from source in case html has embed.js. */
@@ -109,6 +114,16 @@ export class DynamicComponent implements OnInit {
 		this.fen = this.boardManager.getFEN();
 		this.pgn = this.boardManager.getPGN();
 		console.log("player" + this.playerID + ": " + move);
+		const jsonData: any = [
+			{
+				playerID: this.playerID,
+				command: "move",
+				data: move
+			}]
+
+	//	window.parent.postMessage(move, '*');
+		window.parent.postMessage(jsonData, '*');
+
 	}
 
 	public moveManual(): void {
@@ -160,6 +175,11 @@ export class DynamicComponent implements OnInit {
 
 	}
 	ngAfterViewInit() {
+		addEventListener('message', event => {
+			console.log("Chessboard " + this.playerID + " received message:");
+			console.table(event.data);
+		});
+
 		// 	let content = '<button id="button" class="button" >My button </button>';
 		// 	let doc = this.iframe1.nativeElement.contentDocument || this.iframe1.nativeElement.contentWindow;
 		// 	doc.open();
@@ -178,4 +198,5 @@ export class DynamicComponent implements OnInit {
 		//
 		//		this.doc.body.appendChild(this.compRef.location.nativeElement);
 	}
+
 }

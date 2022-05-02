@@ -27,7 +27,8 @@ export class AppComponent {
 	title = 'angularDemo1';
 	doc1: any;
 	doc2: any;
-	compRef: ComponentRef<DynamicComponent>;
+	compRef1: ComponentRef<DynamicComponent>;
+	compRef2: ComponentRef<DynamicComponent>;
 
 	//constructor(private ngxChessBoardService: NgxChessBoardService) {
 
@@ -49,7 +50,7 @@ export class AppComponent {
 	constructor(private vcRef: ViewContainerRef, private resolver: ComponentFactoryResolver) {
 		console.log("constructor");
 		console.log("iframe1: " + this.iframe1);
-		console.log("iframe2: " +this.iframe2);
+		console.log("iframe2: " + this.iframe2);
 		//this.onLoad();
 	}
 
@@ -169,14 +170,22 @@ export class AppComponent {
 		this.setPgn();
 	}
 	ngAfterViewInit() {
-		console.log("ngAfterViewInit iframe1: "+ this.iframe1);
-		console.log("ngAfterViewInit iframe2: "+ this.iframe2);
+		console.log("ngAfterViewInit iframe1: " + this.iframe1);
+		console.log("ngAfterViewInit iframe2: " + this.iframe2);
 		this.onLoad();
 		// 	let content = '<button id="button" class="button" >My button </button>';
 		// 	let doc = this.iframe1.nativeElement.contentDocument || this.iframe1.nativeElement.contentWindow;
 		// 	doc.open();
 		// 	doc.write(content);
 		// 	doc.close();
+
+		window.addEventListener('message', event => {
+			console.log(`Parent Received message: `);
+			console.log(event);
+			if (!(String(event.data)).includes("player")) {
+		//		window.postMessage("player 1");
+			}
+		});
 	}
 	onLoad() {
 		console.log("onload successful");
@@ -191,14 +200,18 @@ export class AppComponent {
 	createComponent() {
 		console.log("component was created");
 		const compFactory = this.resolver.resolveComponentFactory(DynamicComponent);
-		this.compRef = this.vcRef.createComponent(compFactory);
-		this.doc1.body.appendChild(this.compRef.location.nativeElement);
-		this.doc1.body.playerID = 0;
-		
-		this.compRef = this.vcRef.createComponent(compFactory);
-		this.doc2.body.appendChild(this.compRef.location.nativeElement);
-		this.doc1.body.playerID = 1;
+		this.compRef1 = this.vcRef.createComponent(compFactory);
+		this.doc1.body.appendChild(this.compRef1.location.nativeElement);
 
+		(<DynamicComponent>this.compRef1.instance).playerID = 1;
+		// this.doc1.postMessage("player1");
+
+
+		this.compRef2 = this.vcRef.createComponent(compFactory);
+		this.doc2.body.appendChild(this.compRef2.location.nativeElement);
+		(<DynamicComponent>this.compRef2.instance).playerID = 2;
+
+		// this.doc2.postMessage("player2");
 	}
 }
 
