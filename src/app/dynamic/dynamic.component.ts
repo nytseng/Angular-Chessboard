@@ -1,32 +1,25 @@
-//import { Component, ViewChild } from '@angular/core';
-//import { MoveChange, NgxChessBoardService, NgxChessBoardComponent } from 'ngx-chess-board';
-//import { NgxChessBoardView } from 'ngx-chess-board';
-
-import { Component, ElementRef, ViewChild, ComponentRef, ViewContainerRef, ComponentFactoryResolver } from '@angular/core';
+import { Component, ElementRef, ViewChild, ComponentRef, ViewContainerRef, ComponentFactoryResolver, EventEmitter, OnInit, Input, Output, ViewEncapsulation } from '@angular/core';
 import {
 	MoveChange,
 	NgxChessBoardComponent,
 	PieceIconInput
 } from 'ngx-chess-board';
 
-import {
-	DynamicComponent
-} from './dynamic/dynamic.component';
-
 @Component({
-	selector: 'app-root',
-	templateUrl: './app.component.html',
-	styleUrls: ['./app.component.scss']
+	selector: 'app-dynamic',
+	templateUrl: './dynamic.component.html',
+	styleUrls: ['./dynamic.component.scss'],
+	encapsulation: ViewEncapsulation.ShadowDom
+
 })
 
-export class AppComponent {
-	//public pgn: string = '';
-	@ViewChild('iframe1', { static: true, read: ElementRef }) iframe1: ElementRef;
-	@ViewChild('iframe2', { static: true, read: ElementRef }) iframe2: ElementRef;
+export class DynamicComponent implements OnInit {
+	@Input() firstInput: any;
+	@Input() playerID: number;
 
-	title = 'angularDemo1';
-	doc1: any;
-	doc2: any;
+	@Output() firstOutput: any;
+
+	title = 'DynamicComponent';
 	compRef: ComponentRef<DynamicComponent>;
 
 	//constructor(private ngxChessBoardService: NgxChessBoardService) {
@@ -48,8 +41,6 @@ export class AppComponent {
 
 	constructor(private vcRef: ViewContainerRef, private resolver: ComponentFactoryResolver) {
 		console.log("constructor");
-		console.log("iframe1: " + this.iframe1);
-		console.log("iframe2: " +this.iframe2);
 		//this.onLoad();
 	}
 
@@ -57,9 +48,6 @@ export class AppComponent {
 	/** Trigger on data load from source in case html has embed.js. */
 	//	iframely.load();
 	//}
-
-
-	firstInput = 5;
 
 	@ViewChild('board')
 	boardManager: NgxChessBoardComponent;
@@ -120,7 +108,7 @@ export class AppComponent {
 	public moveCallback(move: MoveChange): void {
 		this.fen = this.boardManager.getFEN();
 		this.pgn = this.boardManager.getPGN();
-		console.log(move);
+		console.log("player" + this.playerID + ": " + move);
 	}
 
 	public moveManual(): void {
@@ -168,37 +156,26 @@ export class AppComponent {
 			'17. Nb6 Nb5 18. Nbxd5 f4 19. Ne4 Na7 20. Nexf6';
 		this.setPgn();
 	}
+	ngOnInit() {
+
+	}
 	ngAfterViewInit() {
-		console.log("ngAfterViewInit iframe1: "+ this.iframe1);
-		console.log("ngAfterViewInit iframe2: "+ this.iframe2);
-		this.onLoad();
 		// 	let content = '<button id="button" class="button" >My button </button>';
 		// 	let doc = this.iframe1.nativeElement.contentDocument || this.iframe1.nativeElement.contentWindow;
 		// 	doc.open();
 		// 	doc.write(content);
 		// 	doc.close();
 	}
-	onLoad() {
-		console.log("onload successful");
-		console.log("iframe1: " + this.iframe1);
-		console.log("iframe2: " + this.iframe2);
-
-		this.doc1 = this.iframe1.nativeElement.contentDocument || this.iframe1.nativeElement.contentWindow;
-		this.doc2 = this.iframe2.nativeElement.contentDocument || this.iframe2.nativeElement.contentWindow;
-		this.createComponent();
-	}
+	//onLoad() {
+	//	console.log("onload successful");
+	//	this.createComponent();
+	//}
 
 	createComponent() {
-		console.log("component was created");
-		const compFactory = this.resolver.resolveComponentFactory(DynamicComponent);
-		this.compRef = this.vcRef.createComponent(compFactory);
-		this.doc1.body.appendChild(this.compRef.location.nativeElement);
-		this.doc1.body.playerID = 0;
-		
-		this.compRef = this.vcRef.createComponent(compFactory);
-		this.doc2.body.appendChild(this.compRef.location.nativeElement);
-		this.doc1.body.playerID = 1;
-
+		//	console.log("component was created");
+		//	const compFactory = this.resolver.resolveComponentFactory(DynamicComponent);
+		//	this.compRef = this.vcRef.createComponent(compFactory);
+		//
+		//		this.doc.body.appendChild(this.compRef.location.nativeElement);
 	}
 }
-
