@@ -180,10 +180,19 @@ export class DynamicComponent implements OnInit {
 
 				console.log("Chessboard " + this.playerID + " received message:");
 				console.table(event.data)
-				this.manualMove = event.data.move;
-				this.moveManual();
-			};
-		});
+
+				if (event.data.hasOwnProperty("rotate")) {
+					this.reverse();
+				};
+
+				if (event.data.hasOwnProperty("move")) {
+
+					this.manualMove = event.data.move;
+					this.moveManual();
+				};
+			}
+		}
+		);
 
 		// 	let content = '<button id="button" class="button" >My button </button>';
 		// 	let doc = this.iframe1.nativeElement.contentDocument || this.iframe1.nativeElement.contentWindow;
