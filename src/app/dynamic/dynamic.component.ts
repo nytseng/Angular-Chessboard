@@ -23,6 +23,8 @@ export class DynamicComponent implements OnInit {
 	@Input() playerID: number;
 	@Output() firstOutput: any;
 
+	moveByParentCallBackMode = false;
+
 	title = 'DynamicComponent';
 	compRef: ComponentRef<DynamicComponent>;
 
@@ -56,6 +58,10 @@ export class DynamicComponent implements OnInit {
 
 	@ViewChild('board')
 	boardManager: NgxChessBoardComponent;
+
+	@ViewChild('boardTitle') boardTitle: ElementRef;
+
+
 
 	public fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1';
 	private currentStateIndex: number;
@@ -122,8 +128,9 @@ export class DynamicComponent implements OnInit {
 			}]
 
 		//	window.parent.postMessage(move, '*');
-		window.parent.postMessage(jsonData, '*');
-
+		if (!this.moveByParentCallBackMode) {
+			window.parent.postMessage(jsonData, '*');
+		}
 	}
 
 	public moveManual(): void {
@@ -188,8 +195,25 @@ export class DynamicComponent implements OnInit {
 				if (event.data.hasOwnProperty("move")) {
 
 					this.manualMove = event.data.move;
+					this.moveByParentCallBackMode = true;
 					this.moveManual();
+					this.moveByParentCallBackMode = false;
+
 				};
+				if (event.data.hasOwnProperty("enable")) {
+					console.log("playerID " + this.playerID + ", enabled: " + event.data.enable);
+					if (event.data.enable == 0) {
+						this.lightDisabled = true;
+						this.darkDisabled = true;
+						this.boardTitle.nativeElement.innerText = "Player " + this.playerID;
+					}
+					else {
+						this.lightDisabled = false;
+						this.darkDisabled = false;
+						this.boardTitle.nativeElement.innerText = "Player " + this.playerID + ": Your Turn";
+
+					}
+				}
 			}
 		}
 		);
