@@ -29,9 +29,10 @@ export class AppComponent {
 	doc2: any;
 	compRef1: ComponentRef<DynamicComponent>;
 	compRef2: ComponentRef<DynamicComponent>;
-	
-	strTest = "\n tester \n" ;
+
+	strTest = "\n tester \n";
 	currentPlayerID = 1;
+	currNumOfMoves = 0;
 
 	boardTwoIsInit = false;
 
@@ -86,8 +87,8 @@ export class AppComponent {
 	};
 
 	ngAfterViewInit() {
-		console.log("ngAfterViewInit iframe1: " + this.iframe1);
-		console.log("ngAfterViewInit iframe2: " + this.iframe2);
+//		console.log("ngAfterViewInit iframe1: " + this.iframe1);
+//		console.log("ngAfterViewInit iframe2: " + this.iframe2);
 		this.onLoad();
 		// 	let content = '<button id="button" class="button" >My button </button>';
 		// 	let doc = this.iframe1.nativeElement.contentDocument || this.iframe1.nativeElement.contentWindow;
@@ -96,9 +97,29 @@ export class AppComponent {
 		// 	doc.close();
 
 		window.addEventListener('message', event => {
-
+			console.log("parent: received msg");
+			console.table(event.data);
 			if (!this.boardTwoIsInit) {
 				this.createNewGame();
+				if (localStorage.getItem("numOfMoves") != null) {
+					// replay old moves
+					var numOfMoves = Number(localStorage.getItem("numOfMoves"));
+					for (var i = 1; i <= numOfMoves; i++) {
+						var moveStr = localStorage.getItem("move" + i);
+
+						window.postMessage({ "to_player": 1, "move": moveStr });
+						window.postMessage({ "to_player": 2, "move": moveStr });
+					}
+					// calculate whos turn
+					if (numOfMoves % 2 == 0) {
+						this.currentPlayerID = 2;
+
+					} else {
+						this.currentPlayerID = 1;
+					}
+					this.currNumOfMoves = numOfMoves;
+					this.switchPlayer();
+				}
 			}
 			if (!event.data.hasOwnProperty("to_player")) {
 				console.log(`Parent Received message: `);
@@ -113,6 +134,11 @@ export class AppComponent {
 				console.log("playerID: " + event.data[0].playerID);
 				console.log("otherPlayerID: " + otherPlayerID);
 
+				// store total numOfMoves to local storage
+				this.currNumOfMoves++;
+				localStorage.setItem("numOfMoves", String(this.currNumOfMoves));
+				localStorage.setItem("move" + this.currNumOfMoves, event.data[0].data.move);
+
 
 				window.postMessage({ "to_player": otherPlayerID, "move": event.data[0].data.move });
 				if (event.data[0].data.checkmate) {
@@ -122,19 +148,23 @@ export class AppComponent {
 					return;
 				}
 				// switch player after a move
-
-				if (this.currentPlayerID == 1) {
-					window.postMessage({ "to_player": 1, "enable": 0 });
-					window.postMessage({ "to_player": 2, "enable": 1 });
-					this.currentPlayerID = 2;
-				}
-				else {
-					window.postMessage({ "to_player": 1, "enable": 1 });
-					window.postMessage({ "to_player": 2, "enable": 0 });
-					this.currentPlayerID = 1;
-				}
+				
+				this.switchPlayer();
 			}
 		});
+	}
+
+	switchPlayer() {
+		if (this.currentPlayerID == 1) {
+			window.postMessage({ "to_player": 1, "enable": 0 });
+			window.postMessage({ "to_player": 2, "enable": 1 });
+			this.currentPlayerID = 2;
+		}
+		else {
+			window.postMessage({ "to_player": 1, "enable": 1 });
+			window.postMessage({ "to_player": 2, "enable": 0 });
+			this.currentPlayerID = 1;
+		}
 	}
 
 	createNewGame() {
@@ -178,6 +208,9 @@ export class AppComponent {
 
 		(<DynamicComponent>this.compRef1.instance).reset();
 		(<DynamicComponent>this.compRef2.instance).reset();
+		
+		// reset history
+		localStorage.clear();
 		this.createNewGame();
 
 	}
