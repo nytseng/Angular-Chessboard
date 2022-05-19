@@ -1,0 +1,23 @@
+1:  "ng build" that creates assets/JS into dist/angular-demo1
+
+2: "firebase init"
+    After running: firebase init Few questions will be asked and Reply(In Bold) as follows:
+
+Are you ready to proceed? : Yes
+Which Firebase CLI features do you want to set up for this folder? Press Space to select features, then Enter to confirm your choices. : Hosting: Configure and deploy Firebase Hosting sites
+=== Project Setup
+
+Select a default Firebase project for this directory: Your firebase Project name
+=== Hosting Setup
+
+What do you want to use as your public directory? dist/angular-demo1
+Configure as a single-page app (rewrite all urls to /index.html)? No
+File dist/404.html already exists. Overwrite? No
+File dist/index.html already exists. Overwrite? No
+-----Firebase initialization complete!-----
+
+Now Re-run your app using: ng build 
+
+----Deploy----
+
+firebase deploy

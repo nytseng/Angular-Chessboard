@@ -1,5 +1,7 @@
 {
   "projects": {
-    "default": "demo1-c3b8e"
-  }
+    "default": "chessboard-b9e08",
+    "staging": "chessboard-b9e08"
+  },
+  "targets": {}
 }
