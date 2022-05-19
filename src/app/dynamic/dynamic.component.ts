@@ -46,7 +46,7 @@ export class DynamicComponent implements OnInit {
 	//}
 
 	constructor(private vcRef: ViewContainerRef, private resolver: ComponentFactoryResolver) {
-		console.log("constructor");
+		//	console.log("constructor");
 		//this.onLoad();
 	}
 
@@ -95,7 +95,6 @@ export class DynamicComponent implements OnInit {
 	public pgn: string = '';
 
 	public reset(): void {
-		alert('Resetting board');
 		this.boardManager.reset();
 		this.fen = this.boardManager.getFEN();
 		this.freeMode = false;
@@ -119,7 +118,9 @@ export class DynamicComponent implements OnInit {
 	public moveCallback(move: MoveChange): void {
 		this.fen = this.boardManager.getFEN();
 		this.pgn = this.boardManager.getPGN();
-		console.log("player" + this.playerID + ": " + move);
+		console.log("player" + this.playerID + ": moveObject:");
+		console.table(move);
+
 		const jsonData: any = [
 			{
 				playerID: this.playerID,
@@ -127,8 +128,11 @@ export class DynamicComponent implements OnInit {
 				data: move
 			}]
 
-		//	window.parent.postMessage(move, '*');
+		//		window.parent.postMessage(move, '*');
 		if (!this.moveByParentCallBackMode) {
+			if (move.checkmate) {
+				this.boardTitle.nativeElement.innerText = "Player " + this.playerID + ": checkmate";
+			}
 			window.parent.postMessage(jsonData, '*');
 		}
 	}
@@ -185,8 +189,8 @@ export class DynamicComponent implements OnInit {
 		addEventListener('message', event => {
 			if (event.data.hasOwnProperty("to_player") && event.data.to_player == this.playerID) {
 
-				console.log("Chessboard " + this.playerID + " received message:");
-				console.table(event.data)
+				//	console.log("Chessboard " + this.playerID + " received message:");
+				//	console.table(event.data)
 
 				if (event.data.hasOwnProperty("rotate")) {
 					this.reverse();
@@ -201,7 +205,7 @@ export class DynamicComponent implements OnInit {
 
 				};
 				if (event.data.hasOwnProperty("enable")) {
-					console.log("playerID " + this.playerID + ", enabled: " + event.data.enable);
+					//	console.log("playerID " + this.playerID + ", enabled: " + event.data.enable);
 					if (event.data.enable == 0) {
 						this.lightDisabled = true;
 						this.darkDisabled = true;

@@ -29,6 +29,8 @@ export class AppComponent {
 	doc2: any;
 	compRef1: ComponentRef<DynamicComponent>;
 	compRef2: ComponentRef<DynamicComponent>;
+	
+	strTest = "\n tester \n" ;
 	currentPlayerID = 1;
 
 	boardTwoIsInit = false;
@@ -94,14 +96,9 @@ export class AppComponent {
 		// 	doc.close();
 
 		window.addEventListener('message', event => {
+
 			if (!this.boardTwoIsInit) {
-				window.postMessage({ "to_player": 2, "rotate": 1 });
-				this.boardTwoIsInit = true;
-
-				window.postMessage({ "to_player": 1, "enable": 1 });
-				window.postMessage({ "to_player": 2, "enable": 0 });
-
-				this.currentPlayerID = 1;
+				this.createNewGame();
 			}
 			if (!event.data.hasOwnProperty("to_player")) {
 				console.log(`Parent Received message: `);
@@ -116,7 +113,14 @@ export class AppComponent {
 				console.log("playerID: " + event.data[0].playerID);
 				console.log("otherPlayerID: " + otherPlayerID);
 
+
 				window.postMessage({ "to_player": otherPlayerID, "move": event.data[0].data.move });
+				if (event.data[0].data.checkmate) {
+					console.log("parent detects checkmate!!");
+					alert('Checkmate Detected, click on Create New Game Button to reset');
+
+					return;
+				}
 				// switch player after a move
 
 				if (this.currentPlayerID == 1) {
@@ -133,6 +137,15 @@ export class AppComponent {
 		});
 	}
 
+	createNewGame() {
+		window.postMessage({ "to_player": 2, "rotate": 1 });
+		this.boardTwoIsInit = true;
+
+		window.postMessage({ "to_player": 1, "enable": 1 });
+		window.postMessage({ "to_player": 2, "enable": 0 });
+
+		this.currentPlayerID = 1;
+	}
 	onLoad() {
 		console.log("onload successful");
 		console.log("iframe1: " + this.iframe1);
@@ -159,5 +172,15 @@ export class AppComponent {
 
 		// this.doc2.postMessage("player2");
 	}
+
+	public reset(): void {
+		alert('Resetting board');
+
+		(<DynamicComponent>this.compRef1.instance).reset();
+		(<DynamicComponent>this.compRef2.instance).reset();
+		this.createNewGame();
+
+	}
+
 }
 
