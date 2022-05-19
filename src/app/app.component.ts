@@ -87,40 +87,40 @@ export class AppComponent {
 	};
 
 	ngAfterViewInit() {
-//		console.log("ngAfterViewInit iframe1: " + this.iframe1);
-//		console.log("ngAfterViewInit iframe2: " + this.iframe2);
+		//		console.log("ngAfterViewInit iframe1: " + this.iframe1);
+		//		console.log("ngAfterViewInit iframe2: " + this.iframe2);
 		this.onLoad();
 		// 	let content = '<button id="button" class="button" >My button </button>';
 		// 	let doc = this.iframe1.nativeElement.contentDocument || this.iframe1.nativeElement.contentWindow;
 		// 	doc.open();
 		// 	doc.write(content);
 		// 	doc.close();
+		if (!this.boardTwoIsInit) {
+			this.createNewGame();
+			if (localStorage.getItem("numOfMoves") != null) {
+				// replay old moves
+				var numOfMoves = Number(localStorage.getItem("numOfMoves"));
+				for (var i = 1; i <= numOfMoves; i++) {
+					var moveStr = localStorage.getItem("move" + i);
 
+					window.postMessage({ "to_player": 1, "move": moveStr });
+					window.postMessage({ "to_player": 2, "move": moveStr });
+				}
+				// calculate whos turn
+				if (numOfMoves % 2 == 0) {
+					this.currentPlayerID = 2;
+
+				} else {
+					this.currentPlayerID = 1;
+				}
+				this.currNumOfMoves = numOfMoves;
+				this.switchPlayer();
+			}
+		}
 		window.addEventListener('message', event => {
 			console.log("parent: received msg");
 			console.table(event.data);
-			if (!this.boardTwoIsInit) {
-				this.createNewGame();
-				if (localStorage.getItem("numOfMoves") != null) {
-					// replay old moves
-					var numOfMoves = Number(localStorage.getItem("numOfMoves"));
-					for (var i = 1; i <= numOfMoves; i++) {
-						var moveStr = localStorage.getItem("move" + i);
 
-						window.postMessage({ "to_player": 1, "move": moveStr });
-						window.postMessage({ "to_player": 2, "move": moveStr });
-					}
-					// calculate whos turn
-					if (numOfMoves % 2 == 0) {
-						this.currentPlayerID = 2;
-
-					} else {
-						this.currentPlayerID = 1;
-					}
-					this.currNumOfMoves = numOfMoves;
-					this.switchPlayer();
-				}
-			}
 			if (!event.data.hasOwnProperty("to_player")) {
 				console.log(`Parent Received message: `);
 				console.log(event);
@@ -148,7 +148,7 @@ export class AppComponent {
 					return;
 				}
 				// switch player after a move
-				
+
 				this.switchPlayer();
 			}
 		});
@@ -208,7 +208,7 @@ export class AppComponent {
 
 		(<DynamicComponent>this.compRef1.instance).reset();
 		(<DynamicComponent>this.compRef2.instance).reset();
-		
+
 		// reset history
 		localStorage.clear();
 		this.createNewGame();
